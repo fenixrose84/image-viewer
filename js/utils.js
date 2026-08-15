@@ -1,7 +1,7 @@
 window.addEventListener("error", (event) => {
   const error = `${event.type}: ${event.message}`;
   console.error(error);
-  alert(error);
+  Toast.show(error);
 });
 
 function clamp(value, min, max) {
@@ -72,4 +72,12 @@ function toggleFullscreen() {
   } else {
     document.body.requestFullscreen();
   }
+}
+
+function setImageSrc(imageEl, src) {
+  return new Promise((resolve, reject) => {
+    imageEl.onload = () => resolve(imageEl);
+    imageEl.onerror = reject;
+    imageEl.src = src;
+  });
 }

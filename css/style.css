@@ -116,18 +116,19 @@ body {
 }
 
 #image-container {
+  position: relative;
   display: flex;
   align-items: center;
-  overflow: revert !important;
   width: 100%;
   height: 100%;
-  transition: 1s;
 }
 
 #image-container img {
   width: 100%;
-  height: auto;
+  height: 100%;
   user-select: none;
+  pointer-events: none;
+  object-fit: contain;
 }
 
 .input-screen {
@@ -212,16 +213,11 @@ body {
 
 /* Small screens (Phones, up to 480px wide) */
 @media (max-width: 480px) {
+  .sm-hidden {
+    display: none !important;
+  }
+
   .control-bar {
     width: 100%;
-  }
-
-  .control-bar .jitter,
-  .control-bar .fit-screen {
-    display: none;
-  }
-
-  .hidden-sm {
-    display: none !important;
   }
 }

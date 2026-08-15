@@ -16,36 +16,49 @@ let animationDuration = 0;
 let carouselMode = false;
 let carouselInterval = null;
 let isCoverMode = true;
+let coverScale = 1;
 
-const panzoom = Panzoom(imageEl, {
+const panzoom = Panzoom(imageContainer, {
   minScale: 0.5,
   maxScale: 5,
   contain: false,
   cursor: "grab",
 });
 
-imageEl.addEventListener("wheel", panzoom.zoomWithWheel);
+imageContainer.addEventListener("wheel", panzoom.zoomWithWheel);
 
-function toggleImageFit() {
+window.addEventListener("resize", () => {
+  updateCoverScale()
+});
+
+function updateCoverScale() {
+  const containerWidth = imageContainer.clientWidth;
+  const containerHeight = imageContainer.clientHeight;
+
+  const imageRatio = imageEl.naturalWidth / imageEl.naturalHeight;
+  const containerRatio = containerWidth / containerHeight;
+
+  let displayedWidth;
+  let displayedHeight;
+
+  if (imageRatio > containerRatio) {
+    displayedWidth = containerWidth;
+    displayedHeight = containerWidth / imageRatio;
+  } else {
+    displayedHeight = containerHeight;
+    displayedWidth = containerHeight * imageRatio;
+  }
+
+  coverScale = Math.max(containerWidth / displayedWidth, containerHeight / displayedHeight);
+}
+
+function toggleImageFit(forceCover = false) {
   if (!isImageDisplayed) return;
 
-  imageEl.style.transform = null;
-
-  const screenW = window.innerWidth;
-  const screenH = window.innerHeight;
-
-  const imgW = imageEl.getBoundingClientRect().width;
-  const imgH = imageEl.getBoundingClientRect().height;
-
-  const scaleX = screenW / imgW;
-  const scaleY = screenH / imgH;
-
-  const scale = isCoverMode ? Math.min(scaleX, scaleY) : Math.max(scaleX, scaleY);
+  isCoverMode = forceCover ? true : !isCoverMode;
 
   panzoom.pan(0, 0);
-  panzoom.zoom(scale);
-
-  isCoverMode = !isCoverMode;
+  panzoom.zoom(isCoverMode ? coverScale : 1);
 }
 
 function handleDrop(event) {
@@ -80,10 +93,12 @@ async function displayImage(direction = 0, shouldStopAnimation = true) {
   currentFile = fileIndex;
   const file = currentFiles[currentFile];
   imageInput.value = "";
-  imageEl.src = await getFileDataUrl(file);
+  const imageUrl = await getFileDataUrl(file)
+  await setImageSrc(imageEl, imageUrl)
   changeScreen("image-screen");
   isImageDisplayed = true;
   isCoverMode = true;
+  updateCoverScale();
   toggleImageFit();
 }
 
@@ -129,25 +144,25 @@ function toggleJitter(force) {
   if (!isJittering && force === false) return;
   if (isJittering && force === true) return;
 
-  if (isJittering) {
-    isJittering = false;
+  isJittering = force != null ? force : !isJittering
+  if (!isJittering) {
     clearInterval(jitterInterval);
-    imageContainer.style.transform = null;
-    return;
+    imageEl.style.transform = null;
+  } else {
+    clearInterval(jitterInterval);
+    jitterInterval = setInterval(jitter, 500);
   }
 
-  isJittering = true;
-
-  clearInterval(jitterInterval);
-  jitterInterval = setInterval(jitter, 500);
+  toggleImageFit(true)
+  imageEl.style.transition = isJittering ? "1s" : "";
 }
 
 function jitter() {
   const x = Math.random() * 10;
   const y = Math.random() * 10;
-  const scale = 1 + Math.random() * 0.02;
+  const scale = 1.05 + Math.random() * 0.02;
 
-  imageContainer.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  imageEl.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
 }
 
 function moveImage(x, y) {
@@ -178,12 +193,6 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-document.addEventListener("click", function (e) {
-  if (!controlBar.contains(e.target)) {
-    const isCBHidden = controlBar.classList.contains("hidden-sm");
-
-    if (animationDuration !== 0 && isCBHidden) changeAnimation();
-
-    if (animationDuration === 0 || !isCBHidden) controlBar.classList.toggle("hidden-sm");
-  }
-});
+// document.addEventListener("click", function (e) {
+//   if (!controlBar.contains(e.target) && animationDuration !== 0) changeAnimation();
+// });
