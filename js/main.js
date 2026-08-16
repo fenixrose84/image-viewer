@@ -28,7 +28,7 @@ const panzoom = Panzoom(imageContainer, {
 imageContainer.addEventListener("wheel", panzoom.zoomWithWheel);
 
 window.addEventListener("resize", () => {
-  updateCoverScale()
+  updateCoverScale();
 });
 
 function updateCoverScale() {
@@ -93,13 +93,14 @@ async function displayImage(direction = 0, shouldStopAnimation = true) {
   currentFile = fileIndex;
   const file = currentFiles[currentFile];
   imageInput.value = "";
-  const imageUrl = await getFileDataUrl(file)
-  await setImageSrc(imageEl, imageUrl)
+  const imageUrl = await getFileDataUrl(file);
+  await setImageSrc(imageEl, imageUrl);
   changeScreen("image-screen");
   isImageDisplayed = true;
   isCoverMode = true;
   updateCoverScale();
   toggleImageFit();
+  toggleFullscreen(true);
 }
 
 function goHome() {
@@ -130,8 +131,9 @@ function changeAnimation() {
   animationDuration = duration;
 
   const shouldAnimate = animationDuration > 0;
-  !isJittering && shouldAnimate ? toggleJitter(true) : toggleJitter(false);
+  !isJittering && shouldAnimate ? toggleJitter(true, 2, 10) : toggleJitter(false);
   imageContainer.style.animation = shouldAnimate ? `shaking ${animationDuration}s ease-in-out infinite` : null;
+  if (shouldAnimate) toggleControlBar(false);
 }
 
 function stopAnimation() {
@@ -139,27 +141,26 @@ function stopAnimation() {
   imageContainer.style.animation = null;
 }
 
-function toggleJitter(force) {
+function toggleJitter(force, strengthX, strengthY) {
   if (!isImageDisplayed) return;
   if (!isJittering && force === false) return;
   if (isJittering && force === true) return;
 
-  isJittering = force != null ? force : !isJittering
+  isJittering = force != null ? force : !isJittering;
   if (!isJittering) {
     clearInterval(jitterInterval);
     imageEl.style.transform = null;
   } else {
     clearInterval(jitterInterval);
-    jitterInterval = setInterval(jitter, 500);
+    jitterInterval = setInterval(() => jitter(strengthX, strengthY), 500);
   }
 
-  toggleImageFit(true)
   imageEl.style.transition = isJittering ? "1s" : "";
 }
 
-function jitter() {
-  const x = Math.random() * 10;
-  const y = Math.random() * 10;
+function jitter(strengthX = 10, strengthY = 10) {
+  const x = Math.random() * strengthX;
+  const y = Math.random() * strengthY;
   const scale = 1.05 + Math.random() * 0.02;
 
   imageEl.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
@@ -167,6 +168,10 @@ function jitter() {
 
 function moveImage(x, y) {
   panzoom.pan(x, y, { relative: true });
+}
+
+function toggleControlBar(force) {
+  controlBar.classList.toggle("sm-hidden", force != null ? !force : undefined);
 }
 
 const keyActions = {
@@ -193,6 +198,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// document.addEventListener("click", function (e) {
-//   if (!controlBar.contains(e.target) && animationDuration !== 0) changeAnimation();
-// });
+document.addEventListener("click", function (e) {
+  if (!controlBar.contains(e.target) && animationDuration !== 0) changeAnimation();
+
+  if (!controlBar.contains(e.target) && isImageDisplayed && animationDuration === 0) toggleControlBar();
+});

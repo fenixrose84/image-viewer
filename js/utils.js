@@ -10,7 +10,7 @@ function clamp(value, min, max) {
 
 function wrap(value, min, max) {
   const range = max - min + 1;
-  return ((value - min) % range + range) % range + min;
+  return ((((value - min) % range) + range) % range) + min;
 }
 
 function hide(element) {
@@ -66,8 +66,8 @@ function changeScreen(screenName) {
   document.querySelector(`.screen.${screenName}`).classList.remove("hidden");
 }
 
-function toggleFullscreen() {
-  if (document.fullscreenElement) {
+function toggleFullscreen(force) {
+  if ((document.fullscreenElement && force !== true) || force === false) {
     document.exitFullscreen();
   } else {
     document.body.requestFullscreen();
