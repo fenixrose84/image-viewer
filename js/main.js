@@ -73,8 +73,10 @@ function handleFiles(files) {
 
   files = Array.from(files);
   currentFiles = files.filter((file) => file.type.startsWith("image/"));
+  currentFiles = shuffle(currentFiles);
 
   displayImage(0);
+  toggleFullscreen(true);
 }
 
 async function displayImage(direction = 0, shouldStopAnimation = true) {
@@ -100,7 +102,6 @@ async function displayImage(direction = 0, shouldStopAnimation = true) {
   isCoverMode = true;
   updateCoverScale();
   toggleImageFit();
-  toggleFullscreen(true);
 }
 
 function goHome() {
@@ -110,6 +111,7 @@ function goHome() {
   changeScreen("input-screen");
   imageEl.src = "";
   isImageDisplayed = false;
+  toggleFullscreen(false);
 }
 
 function toggleCarouselMode() {

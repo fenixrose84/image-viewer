@@ -67,10 +67,10 @@ function changeScreen(screenName) {
 }
 
 function toggleFullscreen(force) {
-  if ((document.fullscreenElement && force !== true) || force === false) {
+  if (document.fullscreenElement && force !== true) {
     document.exitFullscreen();
-  } else {
-    document.body.requestFullscreen();
+  } else if (force !== false) {
+    document.documentElement.requestFullscreen();
   }
 }
 
@@ -80,4 +80,15 @@ function setImageSrc(imageEl, src) {
     imageEl.onerror = reject;
     imageEl.src = src;
   });
+}
+
+function shuffle(array) {
+  const arr = [...array]; // don't modify the original
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
 }
