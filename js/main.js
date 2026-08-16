@@ -3,6 +3,7 @@ const inputScreen = document.querySelector(".input-screen");
 const imageInput = inputScreen.querySelector(".image-input input");
 const imageScreen = document.querySelector(".image-screen");
 const panzoomArea = document.getElementById("panzoom-area");
+const imageOuter = document.querySelector(".image-outer")
 const imageContainer = document.getElementById("image-container");
 const imageEl = imageContainer.querySelector("img");
 const controlBar = document.querySelector(".control-bar");
@@ -126,27 +127,29 @@ function toggleCarouselMode() {
 }
 
 function changeAnimation() {
-  if (!isImageDisplayed) return;
+  if (!isImageDisplayed || isJittering) return;
 
   let duration = parseFloat((animationDuration - 0.2).toFixed(1));
   if (duration < 0) duration = 0.8;
   animationDuration = duration;
 
   const shouldAnimate = animationDuration > 0;
-  !isJittering && shouldAnimate ? toggleJitter(true, 2, 10) : toggleJitter(false);
-  imageContainer.style.animation = shouldAnimate ? `shaking ${animationDuration}s ease-in-out infinite` : null;
+  !isJittering && shouldAnimate ? toggleJitter(true, { x: 2, y: 5 }) : toggleJitter(false);
+  imageOuter.style.animation = shouldAnimate ? `shaking ${animationDuration}s ease-in-out infinite` : null;
   if (shouldAnimate) toggleControlBar(false);
 }
 
 function stopAnimation() {
   animationDuration = 0;
-  imageContainer.style.animation = null;
+  imageOuter.style.animation = null;
 }
 
-function toggleJitter(force, strengthX, strengthY) {
-  if (!isImageDisplayed) return;
+function toggleJitter(force, transform = {}) {
+  if (!isImageDisplayed || animationDuration > 0) return;
   if (!isJittering && force === false) return;
   if (isJittering && force === true) return;
+
+  const { x, y, scale } = transform;
 
   isJittering = force != null ? force : !isJittering;
   if (!isJittering) {
@@ -154,18 +157,18 @@ function toggleJitter(force, strengthX, strengthY) {
     imageEl.style.transform = null;
   } else {
     clearInterval(jitterInterval);
-    jitterInterval = setInterval(() => jitter(strengthX, strengthY), 500);
+    jitterInterval = setInterval(() => jitter(x, y, scale), 500);
   }
 
   imageEl.style.transition = isJittering ? "1s" : "";
 }
 
-function jitter(strengthX = 10, strengthY = 10) {
+function jitter(strengthX = 10, strengthY = 10, scale = 1) {
   const x = Math.random() * strengthX;
   const y = Math.random() * strengthY;
-  const scale = 1.05 + Math.random() * 0.02;
+  const newScale = scale + Math.random() * 0.02;
 
-  imageEl.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  imageEl.style.transform = `translate(${x}px, ${y}px) scale(${newScale})`;
 }
 
 function moveImage(x, y) {
@@ -201,7 +204,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("click", function (e) {
-  if (!controlBar.contains(e.target) && animationDuration !== 0) changeAnimation();
+  if (!controlBar.contains(e.target) && animationDuration > 0) changeAnimation();
 
   if (!controlBar.contains(e.target) && isImageDisplayed && animationDuration === 0) toggleControlBar();
 });

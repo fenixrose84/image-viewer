@@ -115,6 +115,14 @@ body {
   opacity: 0.8;
 }
 
+.image-outer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 #image-container {
   position: relative;
   display: flex;
@@ -197,13 +205,16 @@ body {
 
 @keyframes shaking {
   0% {
-    margin-top: 0;
+    top: 0;
+    scale: 1.02;
   }
   50% {
-    margin-top: -32px;
+    top: -32px;
+    scale: 1;
   }
   100% {
-    margin-top: 0;
+    top: 0;
+    scale: 1.02;
   }
 }
 
