@@ -205,16 +205,13 @@ body {
 
 @keyframes shaking {
   0% {
-    top: 0;
-    scale: 1.02;
+    margin-top: 10px;
   }
   50% {
-    top: -32px;
-    scale: 1;
+    margin-top: -20px;
   }
   100% {
-    top: 0;
-    scale: 1.02;
+    margin-top: 10px;
   }
 }
 

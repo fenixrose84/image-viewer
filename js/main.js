@@ -3,7 +3,6 @@ const inputScreen = document.querySelector(".input-screen");
 const imageInput = inputScreen.querySelector(".image-input input");
 const imageScreen = document.querySelector(".image-screen");
 const panzoomArea = document.getElementById("panzoom-area");
-const imageOuter = document.querySelector(".image-outer")
 const imageContainer = document.getElementById("image-container");
 const imageEl = imageContainer.querySelector("img");
 const controlBar = document.querySelector(".control-bar");
@@ -135,13 +134,14 @@ function changeAnimation() {
 
   const shouldAnimate = animationDuration > 0;
   !isJittering && shouldAnimate ? toggleJitter(true, { x: 2, y: 5 }) : toggleJitter(false);
-  imageOuter.style.animation = shouldAnimate ? `shaking ${animationDuration}s ease-in-out infinite` : null;
+  imageContainer.style.animation = shouldAnimate ? `shaking ${animationDuration}s ease-in-out infinite` : null;
   if (shouldAnimate) toggleControlBar(false);
+  imageContainer.style.pointerEvents = shouldAnimate ? "none" : null
 }
 
 function stopAnimation() {
   animationDuration = 0;
-  imageOuter.style.animation = null;
+  imageContainer.style.animation = null;
 }
 
 function toggleJitter(force, transform = {}) {
@@ -204,7 +204,6 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("click", function (e) {
-  if (!controlBar.contains(e.target) && animationDuration > 0) changeAnimation();
-
   if (!controlBar.contains(e.target) && isImageDisplayed && animationDuration === 0) toggleControlBar();
+  if (!controlBar.contains(e.target) && animationDuration > 0) changeAnimation();
 });
